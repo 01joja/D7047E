@@ -1,13 +1,22 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
 
-loss = nn.CrossEntropyLoss()
-input = torch.randn(3, 5, requires_grad=True)
-print(input)
-target = torch.empty(3, dtype=torch.long).random_(5)
-print(target)
-output = loss(input, target)
-print(output)
-output.backward()
+import pickle
+
+nameOfSavefile=input("Write name of file to write to> ")
+
+if nameOfSavefile == "":
+    nameOfSavefile = "test_of_saving"
+
+def save_object(obj, filename):
+    with open(filename, 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+
+
+def load(filename):
+    with open(filename, 'rb') as input:
+        return pickle.load(input)
+
+
+# sample usage
+save_object(kalle, nameOfSavefile)
+
+print(load(nameOfSavefile))

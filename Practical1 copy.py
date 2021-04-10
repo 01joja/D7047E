@@ -12,11 +12,15 @@ def save_object(obj, filename):
     with open(filename, 'wb') as output:  # Overwrites any existing file.
         pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
         
-batch_size = 10000
-epochs = 50
+batch_size = 1000
+epochs = 20
 
-cifar_data = datasets.CIFAR10("./", train=True, download=True, transform=transforms.ToTensor())
-cifar_test = datasets.CIFAR10("./", train=False, download=True, transform=transforms.ToTensor())
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+cifar_data = datasets.CIFAR10("./", train=True, download=True, transform=transform)
+cifar_test = datasets.CIFAR10("./", train=False, download=True, transform=transform)
 
 cifar_train, cifar_val = torch.utils.data.random_split(cifar_data,[40000,10000],generator=torch.Generator().manual_seed(420))
 
@@ -27,43 +31,39 @@ test_loader = DataLoader(cifar_test, batch_size= batch_size, shuffle=False)
 
 network = nn.Sequential(
     
-    nn.Conv2d(in_channels=3, out_channels=10, kernel_size=3),
+    nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5),
     nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=3),
-
-    nn.Conv2d(in_channels=10, out_channels=20, kernel_size=3),
+    nn.MaxPool2d(kernel_size=2,stride=2),
+    nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),
     nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=3),
+    nn.MaxPool2d(kernel_size=2,stride=2),
 
     nn.Flatten(),
-
-    nn.Linear(80, 10),
+    nn.Linear(400, 10),
     nn.Softmax()
 )
 val_images, val_labels = next(iter(validation_loader))
-networkcopy = copy.deepcopy(network)
-optimizer = optim.SGD(network.parameters(), lr = 0.01)
+optimizer = optim.SGD(network.parameters(), lr = 0.0001)
 loss_function = nn.CrossEntropyLoss()
 traininglosses = []
 validationlosses = []
 firstRun = True
 validationloss = 0
 
-
 for epoch in range(epochs):
-    
     for train_nr, (images, labels) in enumerate(train_loader):
-        optimizer.zero_grad()
         prediction = network(images)
         loss = loss_function(prediction, labels)
         loss.backward()
         optimizer.step()
-        print(
-            '\rEpoch {} [{}/{}] - Loss: {}'.format(
-                epoch+1, train_nr+1, len(train_loader), loss
-            ),
-            end=''
-        )
+        optimizer.zero_grad()
+        if (train_nr+1)%10 == 0:
+            print(
+                '\rEpoch {} [{}/{}] - Loss: {}'.format(
+                    epoch+1, train_nr+1, len(train_loader), loss
+                ),
+                end=''
+            )
         traininglosses.append(loss.item())
         
     prediction = network(val_images)
@@ -79,6 +79,10 @@ for epoch in range(epochs):
         save_object(networkcopy,"best_network")
 
     validationlosses.append(validationloss)
+
+train_loader = DataLoader(cifar_train, batch_size=batch_size, shuffle=False)
+validation_loader = DataLoader(cifar_val, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(cifar_test, batch_size= batch_size, shuffle=False)
 
 corr = 0
 
