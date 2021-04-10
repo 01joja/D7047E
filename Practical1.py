@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import copy
 
 batch_size = 10000
-epochs = 1
+epochs = 50
 
 cifar_data = datasets.CIFAR10("./", train=True, download=True, transform=transforms.ToTensor())
 cifar_test = datasets.CIFAR10("./", train=False, download=True, transform=transforms.ToTensor())
@@ -31,10 +31,11 @@ network = nn.Sequential(
     nn.Flatten(),
 
     nn.Linear(80, 10),
-    nn.Softmax()
+    #nn.Softmax()
 )
+val_images, val_labels = next(iter(validation_loader))
 networkcopy = copy.deepcopy(network)
-optimizer = optim.SGD(network.parameters(), lr = 0.001)
+optimizer = optim.SGD(network.parameters(), lr = 0.01)
 loss_function = nn.CrossEntropyLoss()
 traininglosses = []
 validationlosses = []
@@ -55,25 +56,24 @@ for epoch in range(epochs):
             ),
             end=''
         )
+        traininglosses.append(loss.item())
         
-    images, labels = next(iter(validation_loader))
-    prediction = network(images)
-    new_validationloss += loss_function(prediction, labels)
-    
+    prediction = network(val_images)
+    new_validationloss = loss_function(prediction, val_labels)
+
     if firstRun:
         validationloss = new_validationloss
         firstRun = False
-    elif  new_validationloss < validationloss:
+    elif  new_validationloss.item() < validationloss.item():
         validationloss = new_validationloss
         networkcopy = copy.deepcopy(network)
 
-            
-    traininglosses.append(loss)
-    validationlosses.append(validationloss)
+    validationlosses.append(validationloss.item())
 
 corr = 0
 
 for index, (image, label) in enumerate(test_loader):
-    guess = torch.argmax(networkcopy(image), dim=-1)
+    guess = torch.argmax(network(image), dim=-1)
     corr += (guess == label).sum()
-print(corr/10000)
+print("\n","Result on test:", corr/10000)
+print(traininglosses)
