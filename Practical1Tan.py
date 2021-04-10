@@ -32,9 +32,9 @@ plt.show()
 network = nn.Sequential(
     
     nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.Tanh(),
     nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.Tanh(),
     nn.MaxPool2d(kernel_size=2),
 
     nn.Flatten(),
@@ -47,8 +47,6 @@ loss_function = nn.CrossEntropyLoss()
 traininglosses = []
 validationlosses = []
 firstRun = True
-validationloss = 0
-
 
 for epoch in range(epochs):
     new_trainingloss = 0
@@ -68,7 +66,7 @@ for epoch in range(epochs):
             end=''
         )
         new_trainingloss += loss
-'''
+
     traininglosses.append(new_trainingloss)
     new_validationloss = 0
     
@@ -82,19 +80,12 @@ for epoch in range(epochs):
     elif  new_validationloss < validationloss:
         validationloss = new_validationloss
         networkcopy = copy.deepcopy(network)
-        save_object(networkcopy,"best_network")
 
     validationlosses.append(validationloss)
-'''
 corr = 0
 
 for index, (image, label) in enumerate(test_loader):
-    guess = torch.argmax(networkcopy(image), dim=-1)
+    guess = torch.argmax(network(image), dim=-1)
     corr += (guess == label).sum()
-print("\n","Best network result on test:", corr/10000)
-corr = 0
-for index, (image, label) in enumerate(test_loader):
-    guess = torch.argmax(networkcopy(image), dim=-1)
-    corr += (guess == label).sum()
-print("\n","Result lastnetwork on test:", corr/10000)
-
+print("\n","Result on test:", corr/10000)
+print(traininglosses)
