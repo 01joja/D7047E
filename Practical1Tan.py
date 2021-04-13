@@ -117,7 +117,7 @@ if ramError:
     print("\nProblem with ram. Please restart me.")
 else:
 '''
-save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
+#save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
 for index, (image, label) in enumerate(test_loader):
     guess = torch.argmax(networkcopy(image), dim=-1)
     corr += (guess == label).sum()
