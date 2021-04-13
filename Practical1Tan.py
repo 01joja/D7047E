@@ -1,3 +1,5 @@
+from torch.utils.tensorboard import SummaryWriter
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
 
 # Make sure to remove the "ram_crash" file to get a clean run.
 # To fix ram error
@@ -116,7 +119,7 @@ for epoch in range(start,epochs+next_epoch):
                 end=''
             )
             new_trainingloss += loss
-
+        writer.add_scalar('Than/traininglosses', np.random.random(), n_iter)
         traininglosses.append(new_trainingloss.item())
         new_validationloss = 0
         
