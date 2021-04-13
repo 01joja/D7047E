@@ -8,6 +8,7 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+from torch.utils.tensorboard import SummaryWriter
 
 # Make sure to remove the "ram_crash" file to get a clean run.
 # To fix ram error
@@ -116,7 +117,7 @@ for epoch in range(start,epochs+next_epoch):
             )
             new_trainingloss += loss
 
-        traininglosses.append(new_trainingloss)
+        traininglosses.append(new_trainingloss.item())
         new_validationloss = 0
         
         
@@ -131,7 +132,7 @@ for epoch in range(start,epochs+next_epoch):
             validationloss = new_validationloss
             networkcopy = copy.deepcopy(network)
 
-        validationlosses.append(validationloss)
+        validationlosses.append(validationloss.item())
     except:
         epochs = epoch
         ramError = True
