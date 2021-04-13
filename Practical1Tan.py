@@ -123,5 +123,5 @@ for index, (image, label) in enumerate(test_loader):
     corr += (guess == label).sum()
 print("\n","Result on test:", 100*corr.item()/10000)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr.item()/10000,"netwokrk":"Tanh"})
+                    {'hparam/accuracy': 100*corr.item()/10000,"hparam/network":3})
     #print(traininglosses)

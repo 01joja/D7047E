@@ -117,11 +117,11 @@ if ramError:
     print("\nProblem with ram. Please restart me.")
 else:
 '''
-save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
+#save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
 for index, (image, label) in enumerate(test_loader):
     guess = torch.argmax(networkcopy(image), dim=-1)
     corr += (guess == label).sum()
 print("\n","Result on test:", 100*corr.item()/10000)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr.item()/10000,"netwokrk":"SDG"})
+                    {'hparam/accuracy': 100*corr.item()/10000})
     #print(traininglosses)
