@@ -30,10 +30,7 @@ learning_rate = 0.0001
 
 cifar_data = datasets.CIFAR10("./", train=True, download=True, transform=transforms.ToTensor())
 cifar_test = datasets.CIFAR10("./", train=False, download=True, transform=transforms.ToTensor())
-
 cifar_train, cifar_val = torch.utils.data.random_split(cifar_data,[40000,10000],generator=torch.Generator().manual_seed(420))
-
-
 train_loader = DataLoader(cifar_train, batch_size=batch_size, shuffle=False)
 validation_loader = DataLoader(cifar_val, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(cifar_test, batch_size= batch_size, shuffle=False)
@@ -86,7 +83,7 @@ for epoch in range(start,epochs+next_epoch):
             end=''
         )
         new_trainingloss += loss.item()
-    writer.add_scalar('SDG/traininglosses', new_trainingloss/i, epoch)
+    writer.add_scalar('SGD/traininglosses', new_trainingloss/i, epoch)
         #traininglosses.append(new_trainingloss)
     new_validationloss = 0
         
@@ -105,7 +102,7 @@ for epoch in range(start,epochs+next_epoch):
         networkcopy = copy.deepcopy(network)
 
         #validationlosses.append(validationloss.item())
-    writer.add_scalar('SDG/validationloss', validationloss/i, epoch)
+    writer.add_scalar('SGD/validationloss', validationloss/i, epoch)
     #except:
     #    epochs = epoch
     #    ramError = True

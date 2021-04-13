@@ -48,9 +48,9 @@ images, labels = dataiter.next()
 def createNetwork():
     return nn.Sequential(
     nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.Tanh(),
     nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.Tanh(),
     nn.MaxPool2d(kernel_size=2),
     nn.Flatten(),
     nn.Linear(8192, 10),
@@ -117,11 +117,10 @@ if ramError:
     print("\nProblem with ram. Please restart me.")
 else:
 '''
-#save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
 for index, (image, label) in enumerate(test_loader):
     guess = torch.argmax(networkcopy(image), dim=-1)
     corr += (guess == label).sum()
 print("\n","Result on test:", 100*corr.item()/10000)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr.item()/10000,"hparam/network":3})
+                      {'hparam/accuracy': 100*corr.item()/10000})
     #print(traininglosses)
