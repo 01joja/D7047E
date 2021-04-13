@@ -1,6 +1,4 @@
-# D7047E_Exercise1
-Deep Courses on LTU
+# D7047E_Exercise 1
 
-aiodsfhåoqewihfåoiaeh
+This is the result of Exercise 1.
 
-venjjivqebviqed
