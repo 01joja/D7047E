@@ -1,6 +1,8 @@
 
 import pickle
 
+print('\a')
+
 nameOfSavefile=input("Write name of file to write to> ")
 
 if nameOfSavefile == "":

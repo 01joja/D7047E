@@ -31,17 +31,17 @@ test_loader = DataLoader(cifar_test, batch_size= batch_size, shuffle=False)
 
 network = nn.Sequential(
     
-    nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5),
-    nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=2,stride=2),
-    nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),
-    nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=2,stride=2),
-
+    nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3,padding=1),
+    nn.Tanh(),
+    nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3,padding=1),
+    nn.Tanh(),
+    nn.MaxPool2d(kernel_size=2),
     nn.Flatten(),
-    nn.Linear(400, 10),
-    nn.Softmax()
+    nn.Linear(8192, 10)
 )
+
+print(network)
+
 val_images, val_labels = next(iter(validation_loader))
 optimizer = optim.SGD(network.parameters(), lr = 0.0001)
 loss_function = nn.CrossEntropyLoss()
