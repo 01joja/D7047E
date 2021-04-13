@@ -86,7 +86,7 @@ for epoch in range(start,epochs+next_epoch):
             end=''
         )
         new_trainingloss += loss.item()
-    writer.add_scalar('Tanh/traininglosses', new_trainingloss/i, epoch)
+    writer.add_scalar('Adam/traininglosses', new_trainingloss/i, epoch)
         #traininglosses.append(new_trainingloss)
     new_validationloss = 0
         
@@ -105,7 +105,7 @@ for epoch in range(start,epochs+next_epoch):
         networkcopy = copy.deepcopy(network)
 
         #validationlosses.append(validationloss.item())
-    writer.add_scalar('Tanh/validationloss', validationloss/i, epoch)
+    writer.add_scalar('Adam/validationloss', validationloss/i, epoch)
     #except:
     #    epochs = epoch
     #    ramError = True
@@ -123,5 +123,5 @@ for index, (image, label) in enumerate(test_loader):
     corr += (guess == label).sum()
 print("\n","Result on test:", 100*corr.item()/10000)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr.item()/10000,"netwokrk":"Tanh"})
+                    {'hparam/accuracy': 100*corr.item()/10000, "netwokrk":"Adam"})
     #print(traininglosses)
