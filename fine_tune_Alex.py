@@ -47,6 +47,7 @@ loss_function = nn.CrossEntropyLoss()
 validation_loss = 9000
 
 for epoch in range(epochs):
+    new_trainingloss
     i = 0
     # Toggle training AKA turing on dropout
     alex.train()

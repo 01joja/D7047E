@@ -50,6 +50,7 @@ loss_function = nn.CrossEntropyLoss()
 validation_loss = 9000
 
 for epoch in range(epochs):
+    new_trainingloss = 0
     i = 0
     # Toggle training AKA turing on dropout
     alex.train()
@@ -97,14 +98,15 @@ for epoch in range(epochs):
 corr = 0
 i = 0
 for index, (image, label) in enumerate(test_loader):
-    guess = torch.argmax(alex(image), dim=-1)
+    guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
     if 0 == (i%30):
         print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*i/10000,end="                                                         ")
-print("\n","Result on test:", 100*corr/10000)
+correctness = 100*corr/10000
+print("\n","Result on test:", correctness)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr/10000})
+                    {'hparam/accuracy': correctness})
 
 # Store the best network
 save_file = open("feature_extract_Alex_network","wb")
