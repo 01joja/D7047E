@@ -13,60 +13,34 @@ import pickle
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
+with open('MNIST_network', 'rb') as handle:
+    network = pickle.load(handle)
 
 batch_size = 200
-epochs = 2
 learning_rate = 0.001
+epochs = 2
 
 
-
-preprocess = transforms.Compose([
-    transforms.Resize(32),
-    transforms.RandomCrop(32, padding = 2),
-    transforms.ToTensor(),
-    transforms.Lambda(lambda x: x.repeat(3, 1, 1) ),
-    transforms.Normalize((0.1307,0.1307,0.1307), (0.3081,0.3081,0.3081)),
-])
 
 preprocessTest = transforms.Compose([
-    transforms.Resize(32),
     transforms.ToTensor(),
-    transforms.Lambda(lambda x: x.repeat(3, 1, 1) ),
-    transforms.Normalize((0.1307,0.1307,0.1307), (0.3081,0.3081,0.3081)),
+    transforms.Normalize((0.4376821, 0.4437697, 0.47280442), (0.19803012, 0.20101562, 0.19703614))
 ])
 
-MNIST_data = datasets.MNIST("./", train=True, download=True, transform=preprocess)
-MNIST_test = datasets.MNIST("./", train=False, download=True, transform=preprocessTest)
+SVHN_test = datasets.SVHN("./", split='test', download=True, transform=preprocessTest)
+SVHN_train = datasets.SVHN("./", split='train', download=True, transform=preprocessTest)
 
-MNIST_train, MNIST_val = torch.utils.data.random_split(MNIST_data,[50000,10000],generator=torch.Generator().manual_seed(420))
+SVHN_train, SVHN_val = torch.utils.data.random_split(SVHN_train,[60000,13257],generator=torch.Generator().manual_seed(420))
 
+test_loader = DataLoader(SVHN_test, shuffle=False)
+validation_loader = DataLoader(SVHN_val, batch_size=batch_size, shuffle=False)
+train_loader = DataLoader(SVHN_train, batch_size, shuffle=False)
 
-train_loader = DataLoader(MNIST_train, batch_size=batch_size, shuffle=False)
-validation_loader = DataLoader(MNIST_val, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(MNIST_test, batch_size= batch_size, shuffle=False)
+# Stop learning in the original network
+for param in network.parameters():
+    param.requires_grad=False
 
-
-
-def createNetwork():
-    return nn.Sequential(
-    nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
-    nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=2),
-
-    nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
-    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
-    nn.MaxPool2d(kernel_size=2),
-
-
-    nn.Flatten(),
-    nn.Linear(4096, 10),
-    )
-
-network=createNetwork()
+network[11]=nn.Linear(4096,10)
 
 optimizer = optim.Adam(network.parameters(), lr = learning_rate)
 best_model = copy.deepcopy(network)
@@ -119,18 +93,14 @@ for epoch in range(epochs):
 # Run on test data
 corr = 0
 i = 0
+
 for index, (image, label) in enumerate(test_loader):
     i +=1
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
     if 1 == (i%30):
-        print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*i/10000,end="                                                         ")
-correctness = 100*corr/10000
+        print("\r", "Right guess:", 100*corr/26032, "Tested pictures:", 100*i/26032,end="                                                         ")
+correctness = 100*corr/26032
 print("\n","Result on test:", correctness)
-writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': correctness})
-
-# Store the best network
-with open("MNIST_network","wb") as handle:
-    pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    
