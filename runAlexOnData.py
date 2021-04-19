@@ -55,7 +55,8 @@ images, labels = dataiter.next()
 
 # Import alexnet
 alex = torch.hub.load('pytorch/vision:v0.9.0', 'alexnet', pretrained=True)
-alex.eval()
+#alex.eval()
+#alex.train()
 
 # Stop learning in the original network
 #for param in alex.parameters():
