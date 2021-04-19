@@ -3,3 +3,4 @@ cifar-10-batches-py/
 ram_crash
 runs/
 .vscode/
+MNIST/
