@@ -13,16 +13,6 @@ import pickle
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-# Make sure to remove the "ram_crash" file to get a clean run.
-# To fix ram error
-crashfile = "ram_crash"
-def save_object(network, epoch, testdata, validationdata, crashed, filename):
-    with open(filename, 'wb') as output:  # Overwrites any existing file.
-        network_dump = {"network":network, "epoch":epoch, "testdata":testdata, "validationdata":validationdata, "crashed":crashed}
-        pickle.dump(network_dump, output, pickle.HIGHEST_PROTOCOL)
-
-
-
 
 batch_size = 200
 epochs = 2
@@ -58,11 +48,6 @@ train_loader = DataLoader(MNIST_train, batch_size=batch_size, shuffle=False)
 validation_loader = DataLoader(MNIST_val, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(MNIST_test, batch_size= batch_size, shuffle=False)
 
-dataiter = iter(train_loader)
-images, labels = dataiter.next()
-
-#plt.imshow(np.transpose(torchvision.utils.make_grid(images).numpy(),(1,2,0)))
-#plt.show()
 
 
 def createNetwork():
@@ -84,70 +69,71 @@ def createNetwork():
     nn.Linear(4096, 10),
     )
 
-# Checks if anychrash happend
-start = 0
-next_epoch = 0
-network = createNetwork()
-ramError = False
-networkcopy = copy.deepcopy(network)
-optimizer = optim.Adam(network.parameters(), lr = learning_rate)
-loss_function = nn.CrossEntropyLoss()
-firstRun = True
+network=createNetwork()
 
-for epoch in range(start,epochs+next_epoch):
+optimizer = optim.Adam(network.parameters(), lr = learning_rate)
+best_model = copy.deepcopy(network)
+loss_function = nn.CrossEntropyLoss()
+validation_loss = 9000
+
+for epoch in range(epochs):
     new_trainingloss = 0
-    #try:
     i = 0
+    # Toggle training AKA turing on dropout
     for train_nr, (images, labels) in enumerate(train_loader):
         i += 1
         optimizer.zero_grad()
-
         prediction = network(images)
         loss = loss_function(prediction, labels)
         loss.backward()
         optimizer.step()
         print(
-            '\rEpoch {} [{}/{}] - Loss: {}'.format(
+            '\rEpoch {} [{}/{}] - Loss: {} train'.format(
                 epoch+1, train_nr+1, len(train_loader), loss
             ),
-            end=''
+            end='                                                 '
         )
         new_trainingloss += loss.item()
-    writer.add_scalar('Adam/traininglosses', new_trainingloss/i, epoch)
-        #traininglosses.append(new_trainingloss)
-    new_validationloss = 0
-        
+    writer.add_scalar('network_fine/traininglosses', new_trainingloss/i, epoch)
+
+    #Toggle evaluation AKA turing off dropout
+    total_val_loss = 0
     i = 0
     for val_nr, (images, labels) in enumerate(validation_loader):
         i += 1
         prediction = network(images)
-        new_validationloss += loss_function(prediction, labels).item()
+        loss = loss_function(prediction, labels).item()
+        total_val_loss += loss
+        print(
+            '\rEpoch {} [{}/{}] - Loss: {} val'.format(
+                epoch+1, val_nr+1, len(validation_loader), loss
+            ),
+            end='                                                 '
+        )
+    
+    #Calculate the new_validationloss
+    new_validationloss = total_val_loss/i
+    if new_validationloss < validation_loss:
+        validation_loss = new_validationloss
+        best_model = copy.deepcopy(network)
 
-    if firstRun:
-        validationloss = new_validationloss
-        firstRun = False
-    elif  new_validationloss < validationloss:
-        print("\rnew best",end = "")
-        validationloss = new_validationloss
-        networkcopy = copy.deepcopy(network)
+    writer.add_scalar('network_fine/validationloss', new_validationloss/i, epoch)
 
-        #validationlosses.append(validationloss.item())
-    writer.add_scalar('Adam/validationloss', validationloss/i, epoch)
-    #except:
-    #    epochs = epoch
-    #    ramError = True
-    #    break
+# Run on test data
 corr = 0
-'''
-if ramError:
-    save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
-    print("\nProblem with ram. Please restart me.")
-else:
-'''
-#save_object(network, epochs, traininglosses, validationlosses, ramError, crashfile)
+i = 0
 for index, (image, label) in enumerate(test_loader):
-    guess = torch.argmax(networkcopy(image), dim=-1)
-    corr += (guess == label).sum()
-print("\n","Result on test:", 100*corr.item()/10000)
+    i +=1
+    guess = torch.argmax(best_model(image), dim=-1)
+    result = (guess == label).sum()
+    corr += result.item()
+    if 1 == (i%30):
+        print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*i/10000,end="                                                         ")
+correctness = 100*corr/10000
+print("\n","Result on test:", correctness)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
-                    {'hparam/accuracy': 100*corr.item()/10000})
+                    {'hparam/accuracy': correctness})
+
+# Store the best network
+with open("MNIST_network","wb") as handle:
+    pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
