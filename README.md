@@ -1,6 +1,7 @@
-# D7047E_Exercise1
+# D7047E
 Deep Courses on LTU
 
-aiodsfhåoqewihfåoiaeh
 
-venjjivqebviqed
+This branch is work in progress.
+
+Look at the exercise branches to see our solutions.
