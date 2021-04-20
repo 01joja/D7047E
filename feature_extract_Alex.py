@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
 batch_size = 200
-epochs = 5
+epochs = 2
 learning_rate = 0.0001
 
 # Makes it so that the images fits the network
@@ -65,7 +65,7 @@ for epoch in range(epochs):
             '\rEpoch {} [{}/{}] - Loss: {}'.format(
                 epoch+1, train_nr+1, len(train_loader), loss
             ),
-            end=''
+            end='                                                     '
         )
         new_trainingloss += loss.item()
     writer.add_scalar('Alex_feature/traininglosses', new_trainingloss/i, epoch)
@@ -91,6 +91,8 @@ for epoch in range(epochs):
     if new_validationloss < validation_loss:
         validation_loss = new_validationloss
         best_model = copy.deepcopy(alex)
+        print()
+        print("new best")
 
     writer.add_scalar('Alex_feature/validationloss', new_validationloss/i, epoch)
 
@@ -98,18 +100,18 @@ for epoch in range(epochs):
 corr = 0
 i = 0
 for index, (image, label) in enumerate(test_loader):
+    i += 1
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
-    if 0 == (i%30):
-        print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*i/10000,end="                                                         ")
+    print("\r", "Right guess:", 100*corr/10000, "Tested pictures:", 100*i/len(test_loader),end="                                                         ")
 correctness = 100*corr/10000
 print("\n","Result on test:", correctness)
 writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
                     {'hparam/accuracy': correctness})
 
 # Store the best network
-save_file = open("feature_extract_Alex_network","wb")
-pickle.dump(save_file,best_model,correctness)
-save_file.close()
-
+with open("networks/feature_extract_Alex_network", 'wb') as output:  # Overwrites any existing file.
+    network_dump = {"network":alex, "correctness":correctness}
+    pickle.dump(network_dump, output, pickle.HIGHEST_PROTOCOL)
+    output.close()

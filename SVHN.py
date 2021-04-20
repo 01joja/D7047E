@@ -13,7 +13,7 @@ import pickle
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-with open('MNIST_network', 'rb') as handle:
+with open('networks/MNIST_network', 'rb') as handle:
     best_model = pickle.load(handle)
 
 batch_size = 200
@@ -38,15 +38,14 @@ test_loader = DataLoader(SVHN_test, shuffle=False)
 
 # Run on test data
 corr = 0
-i = 0
-
 for index, (image, label) in enumerate(test_loader):
-    i +=1
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
-    if 1 == (i%30):
-        print("\r", "Right guess:", 100*corr/26032, "Tested pictures:", 100*i/26032,end="                                                         ")
+    print("\r", "Right guess:", 100*corr/26032, "Tested pictures:", 100*index/26032,end="                                                         ")
 correctness = 100*corr/26032
+learning_rate = 0
+writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'Untrained SVHN'},
+                    {'hparam/accuracy': correctness})
 print("\n","Result on test:", correctness)
                     

@@ -91,7 +91,7 @@ for epoch in range(epochs):
             end='                                                 '
         )
         new_trainingloss += loss.item()
-    writer.add_scalar('network_fine/traininglosses', new_trainingloss/i, epoch)
+    writer.add_scalar('MINST/traininglosses', new_trainingloss/i, epoch)
 
     #Toggle evaluation AKA turing off dropout
     total_val_loss = 0
@@ -114,23 +114,20 @@ for epoch in range(epochs):
         validation_loss = new_validationloss
         best_model = copy.deepcopy(network)
 
-    writer.add_scalar('network_fine/validationloss', new_validationloss/i, epoch)
+    writer.add_scalar('MINST/validationloss', new_validationloss/i, epoch)
 
 # Run on test data
 corr = 0
-i = 0
 for index, (image, label) in enumerate(test_loader):
-    i +=1
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
-    if 1 == (i%30):
-        print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*i/10000,end="                                                         ")
+    print("\r", "Right guess:", 100*corr/i, "Tested pictures:", 100*index/10000,end="                                                         ")
 correctness = 100*corr/10000
 print("\n","Result on test:", correctness)
-writer.add_hparams({'lr': learning_rate, 'bsize': batch_size},
+writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'MNIST Traingin'},
                     {'hparam/accuracy': correctness})
 
 # Store the best network
-with open("MNIST_network","wb") as handle:
+with open("networks/MNIST_network","wb") as handle:
     pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)

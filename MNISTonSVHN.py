@@ -1,5 +1,6 @@
 from torch.utils.tensorboard import SummaryWriter
 
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,14 +14,12 @@ import pickle
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-with open('MNIST_network', 'rb') as handle:
+with open('networks/MNIST_network', 'rb') as handle:
     network = pickle.load(handle)
 
 batch_size = 200
 learning_rate = 0.001
-epochs = 2
-
-
+epochs = 1
 
 preprocessTest = transforms.Compose([
     transforms.ToTensor(),
@@ -65,7 +64,7 @@ for epoch in range(epochs):
             end='                                                 '
         )
         new_trainingloss += loss.item()
-    writer.add_scalar('network_fine/traininglosses', new_trainingloss/i, epoch)
+    writer.add_scalar('MNIST_feature_extract/traininglosses', new_trainingloss/i, epoch)
 
     #Toggle evaluation AKA turing off dropout
     total_val_loss = 0
@@ -88,19 +87,22 @@ for epoch in range(epochs):
         validation_loss = new_validationloss
         best_model = copy.deepcopy(network)
 
-    writer.add_scalar('network_fine/validationloss', new_validationloss/i, epoch)
+    writer.add_scalar('MNIST_feature_extract/validationloss', new_validationloss/i, epoch)
 
 # Run on test data
 corr = 0
-i = 0
 
 for index, (image, label) in enumerate(test_loader):
-    i +=1
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
-    if 1 == (i%30):
-        print("\r", "Right guess:", 100*corr/26032, "Tested pictures:", 100*i/26032,end="                                                         ")
+    print("\r", "Right guess:", 100*corr/26032, "Tested pictures:", 100*index/26032,end="                                                         ")
 correctness = 100*corr/26032
 print("\n","Result on test:", correctness)
+writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'Feature extracted SVHN'},
+                    {'hparam/accuracy': correctness})
                     
+# Store the best network
+with open("networks/Feature_extract_MNIST_on_SVHN_network","wb") as handle:
+    pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
