@@ -22,6 +22,12 @@ import torchvision
 import pickle
 import os
 
+# Set up savepaths
+cwd = os.getcwd()
+save_path = os.path.join(cwd,'Results')
+save_path_PCA = os.path.join(save_path,'1e-3 PCA.png')
+save_path_tSNE = os.path.join(save_path,'1e-3 t-SNE.png')
+
 #Transform the images
 batch_size = 10000
 preprocess = transforms.Compose([
@@ -61,14 +67,14 @@ np_features=features.detach().numpy()
 # Sets 10 colors to the different labels
 colors=["#e6194B","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#42d4f4","#f032e6","#bfef45","#fabed4"]
 
-print("Calculating PCA for 1e-6 network")
+print("Calculating PCA for 1e-3 network")
 pca = PCA(n_components=2)
 pca_result = pca.fit_transform(np_features)
 print("Procentage of influce from 2 most influential features ", pca.explained_variance_ratio_)
 
 # Used to only add every label once.
 # There is probably a better whay of doing it.
-print("adding points to plot\n")
+print("adding points to plot")
 label_added=[False,False,False,False,False,False,False,False,False,False]
 fig, ax = plt.subplots()
 for i in range(len(label)):
@@ -82,8 +88,11 @@ for i in range(len(label)):
         label_added[label[i]]=True
     if i%100 == 0:
         print("\r" + str(100*i/batch_size), end="%      ")
-print("\n Done!")
-fig.savefig('filename.eps', format='eps')
+print("\nDone!")
+
+ax.legend()
+ax.grid(True)
+fig.savefig(save_path_PCA, format='png')
 
 print("Processing t-SNE")
 tSNE = TSNE(n_components=2)
@@ -92,7 +101,7 @@ tSNE_result = tSNE.fit_transform(np_features)
 
 label_added=[False,False,False,False,False,False,False,False,False,False]
 
-print("adding points to plot\n")
+print("adding points to plot")
 fig, ax = plt.subplots()
 for i in range(len(label)):
     if label_added[label[i]]:
@@ -106,7 +115,9 @@ for i in range(len(label)):
     if i%100 == 0:
         print("\r" + str(100*i/batch_size), end="%      ")
             
-print("\n Done!")
+print("\nDone!")
 ax.legend()
 ax.grid(True)
-plt.show()
+fig.savefig(save_path_tSNE, format='png')
+
+print("Saved plots in",save_path)

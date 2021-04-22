@@ -115,7 +115,7 @@ for epoch in range(epochs):
         best_model = copy.deepcopy(network)
         print("new best model")
         # Store the best network
-        with open("1e-3 best model","wb") as handle:
+        with open("1e-3","wb") as handle:
             pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     writer.add_scalar('MINST/1e-6', new_validationloss/i, epoch)
