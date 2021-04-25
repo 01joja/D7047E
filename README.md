@@ -1,7 +1,8 @@
 # D7047E
 Deep Courses on LTU
 
+The project ADL Project Pneumonia Detection.
 
-This branch is work in progress.
+Download the files on:
+https://ltu.app.box.com/s/ywboito9frcx5w4c4mzrrrl4qf2rh9u3
 
-Look at the exercise branches to see our solutions.
