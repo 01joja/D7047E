@@ -20,11 +20,13 @@ def change_pic(pathLoad,pathSave,width,hight):
         file_path = os.path.join(pathLoad,filename)
         save_file_path = os.path.join(pathSave,filename)
         if os.path.isfile(file_path):
-            image = Image.open(file_path)
-            w, h = image.size
-            result = Image.new(image.mode,(width,hight), 0)
-            result.paste(image,(int(width/2-w/2),int(hight/2-h/2)))
-            result.save(os.path.join(save_file_path), quality=95)
+            if filename != ".DS_Store":
+                image = Image.open(file_path)
+                w, h = image.size
+                result = Image.new(image.mode,(width,hight), 0)
+                result.paste(image,(int(width/2-w/2),int(hight/2-h/2)))
+                result.save(os.path.join(save_file_path), quality=95)
+                print(save_file_path)
         else:
             try:
                 os.mkdir(save_file_path)

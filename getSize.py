@@ -15,11 +15,14 @@ startPath = os.path.join(os.getcwd(),"dataset")
 def check_max_size(path):
     l_width = 0
     l_height = 0
+    width = -1
+    height = -1
     for filename in os.listdir(path):
         file_path = os.path.join(path,filename)
         if os.path.isfile(file_path):
-            image = Image.open(file_path)
-            width, height = image.size
+            if filename != ".DS_Store":
+                image = Image.open(file_path)
+                width, height = image.size
         else:
             width, height = check_max_size(file_path)
         if width>l_width:
