@@ -37,18 +37,30 @@ plt.draw()
 
 
 # If no transform given it will just return the picture as tensor
-class CustomDataSet(Dataset):
+class PneumoniaDataSet(Dataset):
     def __init__(self, main_dir, transform=None):
         self.main_dir = main_dir
         self.transform = transform
-        self.all_imgs = os.listdir(main_dir)
-        self.total_imgs = len(self.all_imgs)
+        pneumonia_dir = os.path.join(main_dir,"PNEUMONIA")
+        normal_dir = os.path.join(main_dir,"NORMAL")
+        pneumonia_imgs = os.listdir(pneumonia_dir)
+        normal_imgs = os.listdir(normal_dir)
+        self.total_imgs = len(pneumonia_imgs) + len(normal_imgs)
+        self.path_to_pictures=[""]*self.total_imgs
+        self.labels = [torch.tensor([0,1])]*self.total_imgs
+        for i in range(self.total_imgs):
+            if i < len(normal_imgs):
+                self.path_to_pictures[i]=os.path.join(normal_dir,normal_imgs[i])
+                normal = torch.tensor([1,0])
+                self.labels[i] = normal
+            else: 
+                self.path_to_pictures[i]=os.path.join(normal_dir,pneumonia_imgs[i-len(normal_imgs)])
 
     def __len__(self):
-        return len(self.total_imgs)
+        return self.total_imgs
 
     def __getitem__(self, idx):
-        img_loc = os.path.join(self.main_dir, self.all_imgs[idx])
+        img_loc = self.path_to_pictures[idx]
         if self.transform:
             image = Image.open(img_loc).convert("RGB")
             tensor_image = self.transform(image)
@@ -59,9 +71,9 @@ class CustomDataSet(Dataset):
 
 startPath = os.path.join(os.getcwd(),"dataset")
 startPath = os.path.join(startPath,"train")
-startPath = os.path.join(startPath,"NORMAL")
 
-test = CustomDataSet(startPath)
-print(test.total_imgs)
-print(test.__getitem__(1))
+train = PneumoniaDataSet(startPath)
+for i in range(train.__len__()):
+    train.__getitem__(i)
+
 

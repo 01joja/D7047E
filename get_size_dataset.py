@@ -32,6 +32,7 @@ def check_max_size(path):
     return l_width,l_height
 
 
+
 w,h =check_max_size(startPath)
 print(w)
 print(h)
