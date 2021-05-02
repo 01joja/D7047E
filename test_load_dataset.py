@@ -17,6 +17,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
 
+'''
 # Just to show one image
 def show_landmarks(image, landmarks):
     """Show image with landmarks"""
@@ -31,22 +32,34 @@ show_landmarks(io.imread(os.path.join('faces/', img_name)),
 # This only shows the plot and continues the code plt.draw()
 # Use plt.show() at the end of code to ensure that the windows stay opened.
 plt.draw()
+'''
 
 
 
 # The class that loads a dataset.
-class FaceLandmarksDataset(Dataset):
-    """Face Landmarks dataset."""
-
-    def __init__(self, csv_file, root_dir, transform=None):
-        """
+class PneumoniaDataset(Dataset):
+    """Pneumonia dataset."""
+    
+    # Original __init__
+    #def __init__(self, csv_file, root_dir, transform=None):
+    """
         Args:
-            csv_file (string): Path to the csv file with annotations.
+        csv_file (string): Path to the csv file with annotations.
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.landmarks_frame = pd.read_csv(csv_file)
+        #self.landmarks_frame = pd.read_csv(csv_file)
+        #self.root_dir = root_dir
+        #self.transform = transform
+
+    def __init__(self, root_dir, transform=None):
+        """
+        Args:
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
         self.root_dir = root_dir
         self.transform = transform
 
@@ -64,7 +77,7 @@ class FaceLandmarksDataset(Dataset):
         landmarks = np.array([landmarks])
         landmarks = landmarks.astype('float').reshape(-1, 2)
         sample = {'image': image, 'landmarks': landmarks}
-
+    
         if self.transform:
             sample = self.transform(sample)
 
