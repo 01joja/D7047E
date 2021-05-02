@@ -3,3 +3,10 @@ cifar-10-batches-py/
 ram_crash
 runs/
 .vscode/
+MNIST/
+train_32x32.mat
+test_32x32.mat
+networks/
+dataset/
+modded_dataset/
+__pycache__/
