@@ -13,7 +13,7 @@ import pickle
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
 
-with open('networks/MNIST_network', 'rb') as handle:
+with open('example_network', 'rb') as handle:
     best_model = pickle.load(handle)
 
 batch_size = 200
