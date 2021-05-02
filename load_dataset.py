@@ -14,7 +14,7 @@ from skimage import io, transform
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from torchvision import transforms, utils, io
 from PIL import Image
 
 
@@ -35,20 +35,25 @@ show_landmarks(io.imread(os.path.join('faces/', img_name)),
 plt.draw()
 '''
 
+
+# If no transform given it will just return the picture as tensor
 class CustomDataSet(Dataset):
     def __init__(self, main_dir, transform=None):
         self.main_dir = main_dir
         self.transform = transform
-        all_imgs = os.listdir(main_dir)
-        self.total_imgs = len(all_imgs)
+        self.all_imgs = os.listdir(main_dir)
+        self.total_imgs = len(self.all_imgs)
 
     def __len__(self):
         return len(self.total_imgs)
 
     def __getitem__(self, idx):
-        img_loc = os.path.join(self.main_dir, self.total_imgs[idx])
-        image = Image.open(img_loc).convert("RGB")
-        tensor_image = self.transform(image)
+        img_loc = os.path.join(self.main_dir, self.all_imgs[idx])
+        if self.transform:
+            image = Image.open(img_loc).convert("RGB")
+            tensor_image = self.transform(image)
+        else:
+            tensor_image = io.read_image(img_loc)
         return tensor_image
 
 
@@ -58,4 +63,5 @@ startPath = os.path.join(startPath,"NORMAL")
 
 test = CustomDataSet(startPath)
 print(test.total_imgs)
+print(test.__getitem__(1))
 
