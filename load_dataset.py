@@ -1,3 +1,5 @@
+# This is the example of how to do it on pytorch https://pytorch.org/tutorials/beginner/basics/data_tutorial.html
+
 # Look a this https://discuss.pytorch.org/t/how-to-load-images-without-using-imagefolder/59999/2
 # The original code uses a CSV
 # needed these packages:
