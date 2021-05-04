@@ -40,21 +40,21 @@ plt.draw()
 
 # If no transform given it will just return the picture as tensor
 class PneumoniaDataSet(Dataset):
-    def __init__(self, main_dir, transform=None):
+    def __init__(self, main_dir, transform=None, target_transform=None):
         self.main_dir = main_dir
         self.transform = transform
+        self.target_transform = target_transform
         pneumonia_dir = os.path.join(main_dir,"PNEUMONIA")
         normal_dir = os.path.join(main_dir,"NORMAL")
         pneumonia_imgs = os.listdir(pneumonia_dir)
         normal_imgs = os.listdir(normal_dir)
         self.total_imgs = len(pneumonia_imgs) + len(normal_imgs)
         self.path_to_pictures=[""]*self.total_imgs
-        self.labels = [torch.tensor([0,1])]*self.total_imgs
+        self.labels = [1]*self.total_imgs
         for i in range(self.total_imgs):
             if i < len(normal_imgs):
                 self.path_to_pictures[i]=os.path.join(normal_dir,normal_imgs[i])
-                normal = torch.tensor([1,0])
-                self.labels[i] = normal
+                self.labels[i] = 0
             else: 
                 self.path_to_pictures[i]=os.path.join(normal_dir,pneumonia_imgs[i-len(normal_imgs)])
 
@@ -63,19 +63,20 @@ class PneumoniaDataSet(Dataset):
 
     def __getitem__(self, idx):
         img_loc = self.path_to_pictures[idx]
+        label = self.labels[idx]
         if self.transform:
             image = Image.open(img_loc).convert("RGB")
             tensor_image = self.transform(image)
         else:
             tensor_image = io.read_image(img_loc)
-        return tensor_image
+        if self.target_transform:
+            label = self.target_transform(label)
+        sample = {"image": tensor_image, "label": label}
+        return sample
 
 
 startPath = os.path.join(os.getcwd(),"dataset")
 startPath = os.path.join(startPath,"train")
-
 train = PneumoniaDataSet(startPath)
-for i in range(train.__len__()):
-    train.__getitem__(i)
 
 
