@@ -1,4 +1,4 @@
-# Theory
+# Theory Exercise 3
 
 ## 1) What are the advantages of t-SNE over PCA?
 
