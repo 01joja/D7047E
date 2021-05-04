@@ -1,5 +1,4 @@
-# D7047E_Exercise1
+# D7047E Jonas
 Deep Courses on LTU
 
-
-Jonas branch
+I will have all my submissions here.
