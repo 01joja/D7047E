@@ -56,7 +56,7 @@ class PneumoniaDataSet(Dataset):
                 self.path_to_pictures[i]=os.path.join(normal_dir,normal_imgs[i])
                 self.labels[i] = 0
             else: 
-                self.path_to_pictures[i]=os.path.join(normal_dir,pneumonia_imgs[i-len(normal_imgs)])
+                self.path_to_pictures[i]=os.path.join(pneumonia_dir,pneumonia_imgs[i-len(normal_imgs)])
 
     def __len__(self):
         return self.total_imgs
@@ -71,12 +71,20 @@ class PneumoniaDataSet(Dataset):
             tensor_image = io.read_image(img_loc)
         if self.target_transform:
             label = self.target_transform(label)
-        sample = {"image": tensor_image, "label": label}
+        sample = [tensor_image, label]
         return sample
 
 
-startPath = os.path.join(os.getcwd(),"dataset")
-startPath = os.path.join(startPath,"train")
-train = PneumoniaDataSet(startPath)
+def getTrainPath():
+    path = os.path.join(os.getcwd(),"dataset")
+    path = os.path.join(path,"train")
+    return path
+
+def getTestPath():
+    path = os.path.join(os.getcwd(),"dataset")
+    path = os.path.join(path,"test")
+    return path
+
+#train = PneumoniaDataSet(startPath)
 
 

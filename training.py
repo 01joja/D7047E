@@ -9,24 +9,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import load_dataset
+import os
 
-batch_size = 200
+batch_size = 20
 epochs = 2
 learning_rate = 0.001
 
 preprocessTraining = transforms.Compose([
-    trasnforms.Greyscale(),
+    transforms.Grayscale(),
     transforms.Resize(2500),
-    transforms.RandomCrop(2500, padding =100),
+    transforms.RandomCrop(2500, padding=100),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,0.1307,0.1307), (0.3081,0.3081,0.3081)),
+    transforms.Normalize((0.1307), (0.3081)),
 ])
 
-
-Dataset =load_dataset.CustomDataSet('', transorm = preprocessTraining)
-
+print("loading dataset")
+train = load_dataset.getTrainPath()
+Dataset =load_dataset.PneumoniaDataSet(train, transform = preprocessTraining)
 data_train, data_valtest = torch.utils.data.random_split(Dataset,[4000,1232],generator=torch.Generator().manual_seed(420))
-data_val, data_testtest = torch.utils.data.random_split(Dataset,[616,616],generator=torch.Generator().manual_seed(420))
+data_val, data_testtest = torch.utils.data.random_split(data_valtest,[616,616],generator=torch.Generator().manual_seed(420))
 
 
 train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=True)
@@ -56,17 +57,18 @@ def createNetwork():
 
 
     nn.Flatten(),
-    nn.Linear(2500, 4096),
+    nn.Linear(504, 4096),
     nn.Linear(4096,2)
     )
 
-
+print("creates dataset")
+network = createNetwork()
 optimizer = optim.Adam(network.parameters(), lr = learning_rate)
 best_model = copy.deepcopy(network)
 loss_function = nn.CrossEntropyLoss()
 validation_loss = 9000
 
-
+print("start traning")
 for epoch in range(epochs):
     new_trainingloss = 0
     i = 0

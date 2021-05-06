@@ -1,25 +1,6 @@
 # Insperation is from https://discuss.pytorch.org/t/about-normalization-using-pre-trained-vgg16-networks/23560/5
 # Will do this after I have loaded the dataset
 
-class MyDataset(Dataset):
-    def __init__(self):
-        self.data = torch.randn(100, 3, 24, 24)
-        
-    def __getitem__(self, index):
-        x = self.data[index]
-        return x
-
-    def __len__(self):
-        return len(self.data)
-    
-
-dataset = MyDataset()
-loader = DataLoader(
-    dataset,
-    batch_size=10,
-    num_workers=1,
-    shuffle=False
-)
 
 
 mean = 0.
