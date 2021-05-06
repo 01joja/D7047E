@@ -20,12 +20,12 @@ preprocessTraining = transforms.Compose([
     transforms.Resize(2500),
     transforms.RandomCrop(2500, padding=100),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307), (0.3081)),
+    transforms.Normalize((0.4823), (0.2230)),
 ])
 
 print("loading dataset")
-train = load_dataset.getTrainPath()
-Dataset =load_dataset.PneumoniaDataSet(train, transform = preprocessTraining)
+path = load_dataset.getTrainPath()
+Dataset =load_dataset.PneumoniaDataSet(path, transform = preprocessTraining)
 data_train, data_valtest = torch.utils.data.random_split(Dataset,[4000,1232],generator=torch.Generator().manual_seed(420))
 data_val, data_testtest = torch.utils.data.random_split(data_valtest,[616,616],generator=torch.Generator().manual_seed(420))
 
