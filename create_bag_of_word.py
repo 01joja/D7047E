@@ -1,19 +1,23 @@
 # https://stackabuse.com/python-for-nlp-creating-bag-of-words-model-from-scratch/
 
 
-import nltk  
-import numpy as np  
-import random  
-import string
-
-import bs4 as bs  
-import urllib.request  
 import re  
 
+f = open("shakespere.txt", "r")
+word_to_index = {}
+index_to_word = []
 
-f = open("demofile.txt", "r")
-print(f.read()) 
+for line in f:
+    line = line.lower()
+    line = re.sub(r'\W',' ',line)
+    line = re.sub(r'\s+',' ',line)
+    sentence = line.split()
+    j = 0
+    for word in sentence:
+        if word not in word_to_index.keys():
+            word_to_index[word] = j
+            index_to_word.append(word)
+            j +=1
 
-#for para in article_paragraphs:  
-#    article_text += para.text
-
+print(word_to_index.keys()) 
+print(len(index_to_word))
