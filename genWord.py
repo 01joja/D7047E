@@ -23,7 +23,6 @@ def genWord(decoder, prime_str='A', predict_len=100, temperature=0.8, cuda=False
     inp = prime_input[:,-1]
     
     for p in range(predict_len):
-        print(inp.size(-1))
         output, hidden = decoder(inp, hidden)
         
         # Sample from the network as a multinomial distribution
@@ -33,10 +32,10 @@ def genWord(decoder, prime_str='A', predict_len=100, temperature=0.8, cuda=False
         # Add predicted character to string and use as next input
         predicted_char = index_to_word[top_i]
         predicted.append(predicted_char)
-        inp = Variable(word_tensor(predicted_char).unsqueeze(0))
+        inp = Variable(word_tensor([predicted_char]).unsqueeze(0))
         if cuda:
             inp = inp.cuda()
-    predicted = predicted.join()
+    predicted = ' '.join(predicted)
     return predicted
 
 # Run as standalone script

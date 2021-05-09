@@ -68,7 +68,6 @@ def save():
     print('Saved as %s' % save_filename)
 
 # Initialize models and start training
-print(n_characters)
 decoder = CharRNN(
     n_characters,
     args.hidden_size,
@@ -94,7 +93,7 @@ try:
 
         if epoch % args.print_every == 0:
             print('[%s (%d %d%%) %.4f]' % (time_since(start), epoch, epoch / args.n_epochs * 100, loss))
-            print(genWord(decoder, 'the', 2, cuda=args.cuda), '\n')
+            print(genWord(decoder, 'the', 100, cuda=args.cuda), '\n')
 
     print("Saving...")
     save()
