@@ -63,6 +63,8 @@ def createNetwork():
 
 print("creates dataset")
 network = createNetwork()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+network.to(device)
 optimizer = optim.Adam(network.parameters(), lr = learning_rate)
 best_model = copy.deepcopy(network)
 loss_function = nn.CrossEntropyLoss()
