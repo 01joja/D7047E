@@ -26,8 +26,10 @@ import pickle
 # If no transform given it will just return the picture as tensor
 class PneumoniaDataSet(Dataset):
     # mainDir is the path to the main directory where the test/train files are.
-    def __init__(self, mainDir, transform=None, targetTransform=None):
-        
+    # Preprocess: if True it will do the transformation before __getitem__
+    def __init__(self, mainDir, transform=None, targetTransform=None, preprocess = False):
+        self.no = 0
+        self.preprocess = preprocess
         # This dose not work.
         #Will transform the pictures and store them in pickle format in a map next to the mainDir
         def transfromPic(mainDir,transform):
@@ -45,6 +47,7 @@ class PneumoniaDataSet(Dataset):
                 shutil.rmtree(mainDir, ignore_errors = False)
             except:
                 print("No file to remove")
+                print(mainDir)
             finally:
                 os.mkdir(mainDir)
                 sick = os.path.join(mainDir,"PNEUMONIA")
@@ -90,7 +93,7 @@ class PneumoniaDataSet(Dataset):
                     end='                                                 '
                 )
             return mainDir     
-        if transform:
+        if transform and preprocess:
             mainDir=transfromPic(mainDir,transform)
         self.transform = transform
         self.targetTransform = targetTransform
@@ -118,15 +121,17 @@ class PneumoniaDataSet(Dataset):
 
     def __getitem__(self, idx):
         img_loc = self.path_to_pictures[idx]
+        self.no+=1
         #print(img_loc)
         label = self.labels[idx]
         if self.transform:
-            
-            tensor_image = torch.load(img_loc)
-            with open(img_loc, 'rb') as f:
-                tensor_image = pickle.load(f)
-            #image = Image.open(img_loc).convert("RGB")
-            tensor_image = self.transform(image)
+            if self.preprocess:
+                tensor_image = torch.load(img_loc)
+                #with open(img_loc, 'rb') as f:
+                #    tensor_image = pickle.load(f)
+            else:
+                image = Image.open(img_loc).convert("RGB")
+                tensor_image = self.transform(image)
         else:
             tensor_image = io.read_image(img_loc)
         if self.targetTransform:
@@ -134,6 +139,8 @@ class PneumoniaDataSet(Dataset):
         sample = [tensor_image, label]
         return sample
 
+    def getTimesRun(self):
+        return self.no
     
 
 def getTrainPath():
@@ -161,8 +168,6 @@ preprocessTraining = transforms.Compose([
 ])
 
 #mainDir = testPath()
-
-
-
-#test = transfromPic(mainDir, preprocessTraining)
+#test = PneumoniaDataSet(mainDir, transform = preprocessTraining)
+#print(test.__getitem__(0))
 

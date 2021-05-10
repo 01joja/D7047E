@@ -116,6 +116,7 @@ for epoch in range(epochs):
 
     writer.add_scalar('MINST/validationloss', new_validationloss/i, epoch)
 
+
 # Run on test data
 corr = 0
 for index, (image, label) in enumerate(test_loader):
