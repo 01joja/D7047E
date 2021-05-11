@@ -10,3 +10,4 @@ networks/
 dataset/
 modded_dataset/
 __pycache__/
+best_network
