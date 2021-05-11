@@ -1,3 +1,5 @@
+from torch.utils.tensorboard import SummaryWriter
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -9,6 +11,9 @@ from tqdm import tqdm
 from create_bag_of_word import *
 from model import *
 from genWord import *
+
+
+writer = SummaryWriter()
 
 # Parse command line arguments
 argparser = argparse.ArgumentParser()
@@ -90,6 +95,10 @@ try:
     for epoch in tqdm(range(1, args.n_epochs + 1)):
         loss = train(*random_training_set(args.chunk_len, args.batch_size))
         loss_avg += loss
+        
+        # Calculate the perplexity 
+        perplexity = torch.exp(loss)
+        writer.add_scalar('Word/perplexity', perplexity, epoch)
 
         if epoch % args.print_every == 0:
             print('[%s (%d %d%%) %.4f]' % (time_since(start), epoch, epoch / args.n_epochs * 100, loss))

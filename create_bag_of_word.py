@@ -1,5 +1,7 @@
 # https://stackabuse.com/python-for-nlp-creating-bag-of-words-model-from-scratch/
 
+from torch.utils.tensorboard import SummaryWriter
+
 import unidecode
 import string
 import random
@@ -8,6 +10,8 @@ import math
 import torch
 import re
 from pathlib  import Path
+
+writer = SummaryWriter()
 
 # Reading and un-unicode-encoding data
 
@@ -26,7 +30,6 @@ for word in tokenized:
         word_to_index[word] = n_characters
         n_characters += 1
 n_characters += 1
-
 
 def read_file(filename):
     file = Path(filename).read_text()

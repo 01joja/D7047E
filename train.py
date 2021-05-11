@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # https://github.com/spro/char-rnn.pytorch
 
+from torch.utils.tensorboard import SummaryWriter
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -12,6 +14,9 @@ from tqdm import tqdm
 from helpers import *
 from model import *
 from generate import *
+
+
+writer = SummaryWriter()
 
 # Parse command line arguments
 argparser = argparse.ArgumentParser()
@@ -89,15 +94,24 @@ start = time.time()
 all_losses = []
 loss_avg = 0
 
+timeStamp = []
+perplexity = []
+
 try:
     print("Training for %d epochs..." % args.n_epochs)
     for epoch in tqdm(range(1, args.n_epochs + 1)):
         loss = train(*random_training_set(args.chunk_len, args.batch_size))
         loss_avg += loss
 
+        # Calculate the perplexity 
+        perplexity = torch.exp(loss)
+        writer.add_scalar('Char/perplexity', perplexity, epoch)
+
         if epoch % args.print_every == 0:
             print('[%s (%d %d%%) %.4f]' % (time_since(start), epoch, epoch / args.n_epochs * 100, loss))
             print(generate(decoder, 'Wh', 100, cuda=args.cuda), '\n')
+        
+
 
     print("Saving...")
     save()
