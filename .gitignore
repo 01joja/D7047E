@@ -9,4 +9,3 @@ networks/
 dataset/
 modded_dataset/
 __pycache__/
-shakespeare.txt
