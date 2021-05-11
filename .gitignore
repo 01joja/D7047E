@@ -1,7 +1,6 @@
 cifar-10-python.tar.gz
 cifar-10-batches-py/
 ram_crash
-runs/
 .vscode/
 MNIST/
 train_32x32.mat
