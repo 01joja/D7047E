@@ -11,7 +11,7 @@ import pickle
 import load_dataset
 import os
 
-batch_size = 200
+batch_size = 1
 epochs = 10
 learning_rate = 0.001
 
@@ -49,14 +49,30 @@ with open("best_network", 'rb') as f:
 # Run on test data
 corr = 0
 guesses = 0
+correctSick = 0
+incorrectSick = 0
+correctNormal = 0
+incorrectNormal = 0
 
 for index, (image, label) in enumerate(test_loader):
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
     guesses +=image.size()[0]
-    print("\r", "Right guess:", 100*corr/616, "Tested pictures:", 100*guesses/616,end="                                                         ")
+    if guess.item()==1:
+        if label.item() == 1:
+            correctSick+=1
+        else:
+            incorrectSick+=1
+    else:
+        if label.item() == 0:
+            correctNormal+=1
+        else: 
+            incorrectNormal+=1
+    print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/616) ,end="                                                         ")
 correctness = 100*corr/616
 print("\n","Result on test:", correctness)
+print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
+print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)
 #writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'MNIST Traingin'},
 #                    {'hparam/accuracy': correctness})

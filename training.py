@@ -12,7 +12,7 @@ import load_dataset
 import os
 
 batch_size = 200
-epochs = 10
+epochs = 30
 learning_rate = 0.001
 
 preprocess = False
@@ -71,15 +71,15 @@ test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=True)
 def createNetwork():
     return nn.Sequential(
     nn.Conv2d(in_channels=1, out_channels=2, kernel_size=5,padding=1),
-    nn.LeakyReLU(),
+    nn.ReLU(),
     nn.Conv2d(in_channels=2, out_channels=2, kernel_size=5,padding=1),
-    nn.LeakyReLU(),
+    nn.ReLU(),
     nn.MaxPool2d(kernel_size=2),
 
     nn.Conv2d(in_channels=2, out_channels=4, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.ReLU(),
     nn.Conv2d(in_channels=4, out_channels=4, kernel_size=3,padding=1),
-    nn.LeakyReLU(),
+    nn.ReLU(),
     nn.MaxPool2d(kernel_size=2),
 
     #nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3,padding=1),
@@ -122,8 +122,8 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         print(
-            '\rEpoch {} [{}/{}] - Loss: {} train'.format(
-                epoch+1, train_nr+1, len(train_loader), loss
+            '\rEpoch {}/{} [{}/{}] - Loss: {:3.4} train'.format(
+                epoch+1,epochs, train_nr+1, len(train_loader), loss
             ),
             end='                                                 '
         )
@@ -139,8 +139,8 @@ for epoch in range(epochs):
         loss = loss_function(prediction, labels).item()
         total_val_loss += loss
         print(
-            '\rEpoch {} [{}/{}] - Loss: {} val'.format(
-                epoch+1, val_nr+1, len(validation_loader), loss
+            '\rEpoch {}/{} [{}/{}] - Loss: {:3.4} val'.format(
+                epoch+1,epochs, val_nr+1, len(validation_loader), loss
             ),
             end='                                                 '
         )
