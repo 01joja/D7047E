@@ -64,9 +64,9 @@ else:
 
 
 
-train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=True)
-validation_loader = DataLoader(data_val, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=True)
+train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=False)
+validation_loader = DataLoader(data_val, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=False)
 
 def createNetwork():
     return nn.Sequential(

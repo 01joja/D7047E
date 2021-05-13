@@ -39,9 +39,9 @@ else:
 data_train, data_valtest = torch.utils.data.random_split(Dataset,[4000,1232],generator=torch.Generator().manual_seed(420))
 data_val, data_testtest = torch.utils.data.random_split(data_valtest,[616,616],generator=torch.Generator().manual_seed(420))
 
-train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=True)
-validation_loader = DataLoader(data_val, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=True)
+train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=False)
+validation_loader = DataLoader(data_val, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=False)
 
 with open("best_network", 'rb') as f:
             best_model = pickle.load(f)
