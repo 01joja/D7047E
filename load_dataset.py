@@ -121,6 +121,7 @@ class PneumoniaDataSet(Dataset):
 
     def __getitem__(self, idx):
         img_loc = self.path_to_pictures[idx]
+        _, imageName = os.path.split(img_loc)
         self.no+=1
         #print(img_loc)
         label = self.labels[idx]
@@ -136,7 +137,7 @@ class PneumoniaDataSet(Dataset):
             tensor_image = io.read_image(img_loc)
         if self.targetTransform:
             label = self.targetTransform(label)
-        sample = [tensor_image, label]
+        sample = [tensor_image, label, imageName]
         return sample
 
     def getTimesRun(self):

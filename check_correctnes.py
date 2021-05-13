@@ -54,7 +54,7 @@ incorrectSick = 0
 correctNormal = 0
 incorrectNormal = 0
 
-for index, (image, label) in enumerate(test_loader):
+for index, (image, label,_) in enumerate(test_loader):
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
