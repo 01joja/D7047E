@@ -8,8 +8,10 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-import load_dataset
+import loadDataset
+import moveDataset
 import os
+from datetime import datetime, timedelta
 
 batch_size = 1
 epochs = 10
@@ -24,24 +26,9 @@ transform = transforms.Compose([
     transforms.Normalize((0.4823), (0.2230)),
 ])
 
-if preprocess:
-    path = load_dataset.getTrainPath()
-    Dataset =load_dataset.PneumoniaDataSet(path, transform = transform, preprocess=preprocess)
-else:
-    try:
-        with open("transformed_dataset", 'rb') as f:
-            Dataset = pickle.load(f)
-    except:
-        path = load_dataset.getTrainPath()
-        Dataset =load_dataset.PneumoniaDataSet(path, transform = transform, preprocess=preprocess)
-        with open("transformed_dataset", 'wb') as f:
-            pickle.dump(Dataset, f, protocol=pickle.HIGHEST_PROTOCOL)
-data_train, data_valtest = torch.utils.data.random_split(Dataset,[4000,1232],generator=torch.Generator().manual_seed(420))
-data_val, data_testtest = torch.utils.data.random_split(data_valtest,[616,616],generator=torch.Generator().manual_seed(420))
-
-train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=False)
-validation_loader = DataLoader(data_val, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(data_testtest, batch_size= batch_size, shuffle=False)
+val2Path = moveDataset.getVal2Path()
+Dataset =loadDataset.PneumoniaDataSet(val2Path, transform = transform, preprocess=preprocess)
+test_loader = DataLoader(Dataset, batch_size= batch_size, shuffle=True)
 
 with open("best_network", 'rb') as f:
             best_model = pickle.load(f)
@@ -53,12 +40,19 @@ correctSick = 0
 incorrectSick = 0
 correctNormal = 0
 incorrectNormal = 0
+noImages = Dataset.__len__()
+starT = datetime.now()
 
 for index, (image, label,_) in enumerate(test_loader):
+    
     guess = torch.argmax(best_model(image), dim=-1)
     result = (guess == label).sum()
     corr += result.item()
     guesses +=image.size()[0]
+    nowT = datetime.now()
+    deltaT =  nowT - starT
+    tLeft = deltaT*(1/(guesses/noImages)-1)
+
     if guess.item()==1:
         if label.item() == 1:
             correctSick+=1
@@ -69,8 +63,10 @@ for index, (image, label,_) in enumerate(test_loader):
             correctNormal+=1
         else: 
             incorrectNormal+=1
-    print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/616) ,end="                                                         ")
-correctness = 100*corr/616
+    print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/noImages) ,
+        end="                 Time left: {} ".format(tLeft)
+    )
+correctness = 100*corr/noImages
 print("\n","Result on test:", correctness)
 print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
 print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)

@@ -144,29 +144,7 @@ class PneumoniaDataSet(Dataset):
         return self.no
     
 
-def getTrainPath():
-    path = os.path.join(os.getcwd(),"dataset")
-    path = os.path.join(path,"train")
-    return path
 
-def getTestPath():
-    path = os.path.join(os.getcwd(),"dataset")
-    path = os.path.join(path,"test")
-    return path
-
-def testPath():
-    path = os.path.join(os.getcwd(),"modded_dataset")
-    path = os.path.join(path,"val")
-    return path
-
-
-preprocessTraining = transforms.Compose([
-    transforms.Grayscale(),
-    transforms.Resize(2500),
-    transforms.RandomCrop(2500, padding=100),
-    transforms.ToTensor(),
-    transforms.Normalize((0.4823), (0.2230)),
-])
 
 #mainDir = testPath()
 #test = PneumoniaDataSet(mainDir, transform = preprocessTraining)

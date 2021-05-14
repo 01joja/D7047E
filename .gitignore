@@ -12,3 +12,4 @@ modded_dataset/
 __pycache__/
 best_network
 90+network
+networks/
