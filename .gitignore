@@ -2,3 +2,5 @@ dataset/
 modded_dataset/
 90+network
 best_network
+cifar-10-batches-py/
+__pycache__/
