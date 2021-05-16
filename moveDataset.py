@@ -81,21 +81,24 @@ def moveDataset(val1N = 154,val1P = 462, val2N = 154, val2P = 462):
             filenameV2, _ = filename.split(".")
             filenameV2 = filenameV2+"-Augmented.jpeg"
             #Chooses the dir to save 
+            augment = True
             if i < val1N:
                 save_file_path = os.path.join(saveVal1N,filename)
                 save_file_pathV2 = os.path.join(saveVal1N,filenameV2)
             elif i < val1N+val2N:
                 save_file_path = os.path.join(saveVal2N,filename)
                 save_file_pathV2 = os.path.join(saveVal2N,filenameV2)
+                augment = False
             else:
                 save_file_path = os.path.join(saveTrainN,filename)   
                 save_file_pathV2 = os.path.join(saveTrainN,filenameV2)        
             shutil.copyfile(file_path, save_file_path)
 
-            # Horizontal flip of the image
-            image = Image.open(file_path)
-            result = ImageOps.mirror(image)
-            result.save(save_file_pathV2, quality=95)
+            if augment:
+                # Horizontal flip of the image
+                image = Image.open(file_path)
+                result = ImageOps.mirror(image)
+                result.save(save_file_pathV2, quality=95)
             i += 1
     
     # Iterates through everyting in dataset/tran/PNEUMONIA

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import moveDataset
 
 
-batch_size = 200
+batch_size = 20
 epochs = 10
 learning_rate = 0.001
 
@@ -48,6 +48,7 @@ try:
     val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transform)
     train = loadDataset.PneumoniaDataSet(trainPath, transform = transform)
 except:
+    print("Creates new dataset")
     moveDataset.moveDataset(val1N = 154,val1P = 462, val2N = 308, val2P = 462)
     val1 = loadDataset.PneumoniaDataSet(val1Path, transform = transform)
     val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transform)

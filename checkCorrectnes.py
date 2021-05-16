@@ -30,7 +30,7 @@ val2Path = moveDataset.getVal2Path()
 Dataset =loadDataset.PneumoniaDataSet(val2Path, transform = transform, preprocess=preprocess)
 test_loader = DataLoader(Dataset, batch_size= batch_size, shuffle=True)
 
-with open("best_network", 'rb') as f:
+with open("networks/network_epochs_40_batch_200", 'rb') as f:
             best_model = pickle.load(f)
 
 # Run on test data
