@@ -3,20 +3,20 @@
 
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-import load_dataset
+import loadDataset
+import moveDataset
 
 preprocessTraining = transforms.Compose([
     transforms.Grayscale(),
-    transforms.Resize([2500,2500]),
+    transforms.Resize([400,400]),
     transforms.ToTensor(),
 ])
 
-path = load_dataset.getTrainPath()
-Dataset =load_dataset.PneumoniaDataSet(path, transform = preprocessTraining)
+path = moveDataset.getTrainPath()
+Dataset =loadDataset.PneumoniaDataSet(path, transform = preprocessTraining)
 loader = DataLoader(
     Dataset,
-    batch_size=10,
-    #num_workers=2,
+    batch_size=200,
     shuffle=False
 )
 
@@ -30,8 +30,8 @@ for data in loader:
     std += data.std(2).sum(0)
     nb_samples += batch_samples
     print(
-        '\rLooked at {} %, of the pictures'.format(
-            (100*nb_samples/5232)
+        '\rLooked at {:.4%}, of the pictures'.format(
+            (nb_samples/5232)
         ),
         end='                                                 '
     )

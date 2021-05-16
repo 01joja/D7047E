@@ -1,1 +1,1 @@
-Calculated STD: tensor([0.2230]) Mean: tensor([0.4823])
+Calculated STD: tensor([0.2224]) Mean: tensor([0.4785])

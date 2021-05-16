@@ -85,6 +85,7 @@ def moveDataset(val1N = 154,val1P = 462, val2N = 154, val2P = 462):
             if i < val1N:
                 save_file_path = os.path.join(saveVal1N,filename)
                 save_file_pathV2 = os.path.join(saveVal1N,filenameV2)
+                augment = False
             elif i < val1N+val2N:
                 save_file_path = os.path.join(saveVal2N,filename)
                 save_file_pathV2 = os.path.join(saveVal2N,filenameV2)

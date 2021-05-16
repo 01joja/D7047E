@@ -13,10 +13,9 @@ import os
 from datetime import datetime, timedelta
 import moveDataset
 
-
-batch_size = 20
+batchSize = 200
 epochs = 10
-learning_rate = 0.001
+learningRate = 0.001
 
 #gets the paths to the different datasets
 val1Path = moveDataset.getVal1Path()
@@ -27,6 +26,13 @@ transform = transforms.Compose([
     transforms.Grayscale(),
     transforms.Resize([400,400]),
     transforms.RandomCrop([350,350], padding=30),
+    transforms.ToTensor(),
+    transforms.Normalize((0.4823), (0.2230)),
+])
+
+transformVal = transforms.Compose([
+    transforms.Grayscale(),
+    transforms.Resize([350,350]),
     transforms.ToTensor(),
     transforms.Normalize((0.4823), (0.2230)),
 ])
@@ -44,19 +50,19 @@ while True:
     print("Answer Yes or No")
 print("Load dataset")
 try:
-    val1 = loadDataset.PneumoniaDataSet(val1Path, transform = transform)
-    val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transform)
+    val1 = loadDataset.PneumoniaDataSet(val1Path, transform = transformVal)
+    val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transformVal)
     train = loadDataset.PneumoniaDataSet(trainPath, transform = transform)
 except:
     print("Creates new dataset")
     moveDataset.moveDataset(val1N = 154,val1P = 462, val2N = 308, val2P = 462)
-    val1 = loadDataset.PneumoniaDataSet(val1Path, transform = transform)
-    val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transform)
+    val1 = loadDataset.PneumoniaDataSet(val1Path, transform = transformVal)
+    val2 = loadDataset.PneumoniaDataSet(val2Path, transform = transformVal)
     train = loadDataset.PneumoniaDataSet(trainPath, transform = transform)
 
-train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
-validation_loader = DataLoader(val1, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(val2, batch_size= batch_size, shuffle=True)
+trainLoader = DataLoader(train, batch_size=batchSize, shuffle=True)
+validationLoader = DataLoader(val1, batch_size=batchSize, shuffle=True)
+testLoader = DataLoader(val2, batch_size= batchSize, shuffle=True)
 
 def createNetwork():
     return nn.Sequential(
@@ -85,7 +91,12 @@ try:
     if continueTraning:
         print("Loading network")
         with open("best_network", 'rb') as f:
-            network = pickle.load(f)
+            object = pickle.load(f)
+            temp = {}
+            if type(object) == type(temp):
+                network = object["network"]
+            else:
+                network = object
 except:
     continueTraning = False
     print("You don't have an existing network")
@@ -93,25 +104,29 @@ except:
 if continueTraning == False:
     print("Creates new network")
     network = createNetwork()
-optimizer = optim.Adam(network.parameters(), lr = learning_rate)
-best_model = copy.deepcopy(network)
-loss_function = nn.CrossEntropyLoss()
-validation_loss = 9000
+optimizer = optim.Adam(network.parameters(), lr = learningRate)
+bestModel = copy.deepcopy(network)
+lossFunction = nn.CrossEntropyLoss()
+validationLoss = 9000
 
 
 totalElements = epochs*val1.__len__()+epochs*train.__len__()
 elementsDone = 0
 starT = datetime.now()
+trainingLoss = [0]
+valLoss = [0]
 
 print("Training started:",starT,"\n")
 for epoch in range(epochs):
-    new_trainingloss = 0
+    newTrainingloss = 0
     # Toggle training AKA turing on dropout
-    for train_nr, (images, labels,_) in enumerate(train_loader):
+    i = 0
+    for train_nr, (images, labels,_) in enumerate(trainLoader):
+        i+=1
         elementsDone +=images.size()[0]
         optimizer.zero_grad()
         prediction = network(images)
-        loss = loss_function(prediction, labels)
+        loss = lossFunction(prediction, labels)
         loss.backward()
         optimizer.step()
         nowT = datetime.now()
@@ -119,43 +134,50 @@ for epoch in range(epochs):
         tLeft = deltaT*(1/(elementsDone/totalElements)-1)
         print(
             '\rEpoch {:3}/{:3} [{:5}/{:5}] - Loss: {:3.4} train'.format(
-                epoch+1,epochs, train_nr+1, len(train_loader), loss
+                epoch+1,epochs, train_nr+1, len(trainLoader), loss
             ),
             end='                         Done: {:2.3%} Time left: {} '.format(elementsDone/totalElements, tLeft)
         )
-        new_trainingloss += loss.item()
-    #swriter.add_scalar('MINST/traininglosses', new_trainingloss/i, epoch)
+        newTrainingloss += loss.item()
+    trainingLoss.append(newTrainingloss/i)
+    #swriter.add_scalar('MINST/traininglosses', newTrainingloss/i, epoch)
 
     #Toggle evaluation AKA turing off dropout
     i = 0
-    total_val_loss = 0
-    for val_nr, (images, labels,_) in enumerate(validation_loader):
+    totalValLoss = 0
+    for val_nr, (images, labels,_) in enumerate(validationLoader):
         i+=1
         elementsDone +=images.size()[0]
         prediction = network(images)
-        loss = loss_function(prediction, labels).item()
-        total_val_loss += loss
+        loss = lossFunction(prediction, labels).item()
+        totalValLoss += loss
         nowT = datetime.now()
         deltaT =  nowT - starT
         tLeft = deltaT*(1/(elementsDone/totalElements)-1)
         print(
             '\rEpoch {:3}/{:3} [{:5}/{:5}] - Loss: {:3.4} train'.format(
-                epoch+1,epochs, train_nr+1, len(train_loader), loss
+                epoch+1,epochs, train_nr+1, len(trainLoader), loss
             ),
             end='                         Done: {:2.3%} Time left: {} '.format(elementsDone/totalElements, tLeft)
         )
     
-    
-    #Calculate the new_validationloss
-    new_validationloss = total_val_loss/i
-    if new_validationloss < validation_loss:
-        validation_loss = new_validationloss
-        best_model = copy.deepcopy(network)
+    #Calculate the newValidationloss
+    newValidationloss = totalValLoss/i
+    valLoss.append(newValidationloss)
+
+    if newValidationloss < validationLoss:
+        validationLoss = newValidationloss
+        bestModel = copy.deepcopy(network)
+        saveObject = {
+            "network": bestModel,
+            "valLoss": valLoss,
+            "testLoss": trainingLoss
+        }
         # Saves network if the loss where better on the validation
         # compered to last validaton.
-        print("\r New best! loss:" + str(validation_loss), end="                  ")
+        print("\r New best! loss:{:3.4}".format(validationLoss), end="                  ")
         with open("best_network", 'wb') as f:
-            pickle.dump(best_model, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    #writer.add_scalar('MINST/validationloss', new_validationloss/i, epoch)
+    #writer.add_scalar('MINST/validationloss', newValidationloss/i, epoch)
 
