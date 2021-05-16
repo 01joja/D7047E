@@ -20,7 +20,7 @@ learning_rate = 0.001
 preprocess = False
 transform = transforms.Compose([
     transforms.Grayscale(),
-    transforms.Resize([350,350]),
+    transforms.Resize([360,360]),
     transforms.ToTensor(),
     transforms.Normalize((0.4823), (0.2230)),
 ])
@@ -37,6 +37,8 @@ with open("best_network", 'rb') as f:
         best_model = object["network"]
     else:
         best_model = object
+
+print(best_model[4])
 
 # Run on test data
 corr = 0
