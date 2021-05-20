@@ -25,12 +25,12 @@ transform = transforms.Compose([
     transforms.Normalize((0.4823), (0.2230)),
 ])
 
-val2Path = moveDataset.getVal2Path()
+val2Path = moveDataset.getTestPath()
 Dataset =loadDataset.PneumoniaDataSet(val2Path, transform = transform, preprocess=preprocess)
 test_loader = DataLoader(Dataset, batch_size= batch_size, shuffle=True)
 
 # Change what network you want to check here.
-with open("best_network", 'rb') as f:
+with open("networks/epochs_80", 'rb') as f:
     object = pickle.load(f)
     temp = {}
     if type(object) == type(temp):
@@ -38,7 +38,6 @@ with open("best_network", 'rb') as f:
     else:
         best_model = object
 
-print(best_model[4])
 
 # Run on test data
 corr = 0
@@ -77,5 +76,6 @@ correctness = corr/noImages
 print("\n","Result on test:{:2.3%}".format(correctness))
 print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
 print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)
+print("Normal correctness: {:2.3%} Sick correctness: {:2.3%} ".format(correctNormal/(correctNormal+incorrectSick), correctSick/(correctSick+incorrectNormal)))
 #writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'MNIST Traingin'},
 #                    {'hparam/accuracy': correctness})

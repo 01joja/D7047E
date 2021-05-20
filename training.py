@@ -61,7 +61,8 @@ except:
     train = loadDataset.PneumoniaDataSet(trainPath, transform = transform)
 trainLoader = DataLoader(train, batch_size=batchSize, shuffle=True)
 validationLoader = DataLoader(val1, batch_size=batchSize, shuffle=True)
-testLoader = DataLoader(val2, batch_size= batchSize, shuffle=True)
+#Set batch_size to 1 to make it easy to create the confusion matrix.
+testLoader = DataLoader(val2, batch_size= 1, shuffle=True)
 
 def createNetwork():
     return nn.Sequential(
@@ -85,7 +86,7 @@ def createNetwork():
 try:
     if continueTraning:
         print("Loading network")
-        with open("networks\\network_epochs_10_batch_200", 'rb') as f:
+        with open("best_network", 'rb') as f:
             object = pickle.load(f)
             temp = {}
             if type(object) == type(temp):
@@ -154,10 +155,10 @@ for epoch in range(epochs):
         deltaT =  nowT - starT
         tLeft = deltaT*(1/(elementsDone/totalElements)-1)
         print(
-            '\rEpoch {:3}/{:3} [{:5}/{:5}] - Loss: {:3.4} train'.format(
-                epoch+1,epochs, train_nr+1, len(trainLoader), loss
+            '\rEpoch {:3}/{:3} [{:5}/{:5}] - Loss: {:3.4} val'.format(
+                epoch+1,epochs, val_nr+1, len(validationLoader), loss
             ),
-            end='                         Done: {:2.3%} Time left: {} '.format(elementsDone/totalElements, tLeft)
+            end='                         Done: {:2.3%} Time left: {} '.format(elementsDone/totalElements,tLeft)
         )
     
     #Calculate the newValidationloss
@@ -167,10 +168,12 @@ for epoch in range(epochs):
     if newValidationloss < validationLoss:
         validationLoss = newValidationloss
         bestModel = copy.deepcopy(network)
+        info = "Date trained: {}, epochs trained: {}, batch size: ".format(datetime.now(),len(trainingLoss),batchSize)
         saveObject = {
             "network": bestModel,
             "valLoss": valLoss,
-            "trainLoss": trainingLoss
+            "trainLoss": trainingLoss,
+            "info": info
         }
         # Saves network if the loss where better on the validation
         # compered to last validaton.
@@ -179,4 +182,44 @@ for epoch in range(epochs):
             pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     #writer.add_scalar('MINST/validationloss', newValidationloss/i, epoch)
+
+# Run on test data
+corr = 0
+guesses = 0
+correctSick = 0
+incorrectSick = 0
+correctNormal = 0
+incorrectNormal = 0
+noImages = val2.__len__()
+starT = datetime.now()
+
+for index, (image, label,_) in enumerate(testLoader):
+    
+    guess = torch.argmax(bestModel(image), dim=-1)
+    result = (guess == label).sum()
+    corr += result.item()
+    guesses +=image.size()[0]
+    nowT = datetime.now()
+    deltaT =  nowT - starT
+    tLeft = deltaT*(1/(guesses/noImages)-1)
+
+    if guess.item()==1:
+        if label.item() == 1:
+            correctSick+=1
+        else:
+            incorrectSick+=1
+    else:
+        if label.item() == 0:
+            correctNormal+=1
+        else: 
+            incorrectNormal+=1
+    print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/noImages) ,
+        end="                 Time left: {} ".format(tLeft)
+    )
+correctness = corr/noImages
+print("\n","Result on test:{:2.3%}".format(correctness))
+print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
+print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)
+#writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'MNIST Traingin'},
+#                    {'hparam/accuracy': correctness})
 
