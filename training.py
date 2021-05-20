@@ -14,8 +14,48 @@ from datetime import datetime, timedelta
 import moveDataset
 
 batchSize = 200
-epochs = 10
+epochs = 60
 learningRate = 0.001
+
+
+def testData():
+    # Run on test data
+    corr = 0
+    guesses = 0
+    correctSick = 0
+    incorrectSick = 0
+    correctNormal = 0
+    incorrectNormal = 0
+    noImages = val2.__len__()
+    starTest = datetime.now()
+
+    for index, (image, label,_) in enumerate(testLoader):
+        
+        guess = torch.argmax(bestModel(image), dim=-1)
+        result = (guess == label).sum()
+        corr += result.item()
+        guesses +=image.size()[0]
+        nowT = datetime.now()
+        deltaT =  nowT - starTest
+        tLeft = deltaT*(1/(guesses/noImages)-1)
+
+        if guess.item()==1:
+            if label.item() == 1:
+                correctSick+=1
+            else:
+                incorrectSick+=1
+        else:
+            if label.item() == 0:
+                correctNormal+=1
+            else: 
+                incorrectNormal+=1
+        print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/noImages) ,
+            end="                 Time left: {} ".format(tLeft)
+        )
+    correctness = corr/noImages
+    output="\n"+"Result on test: {:2.3%}".format(correctness)+"\nGuessed correct sick:"+ str(correctSick)+ " Guessed incorrect sick:"+ str(incorrectSick) + "\nGuessed correct normal:" + str(correctNormal) + " Guessed incorrect normal:" + str(incorrectNormal) + "\nNormal correctness: {:2.3%} Sick correctness: {:2.3%} ".format(correctNormal/(correctNormal+incorrectSick), correctSick/(correctSick+incorrectNormal))
+    print(output)
+    return output
 
 #gets the paths to the different datasets
 val1Path = moveDataset.getVal1Path()
@@ -86,17 +126,19 @@ def createNetwork():
 try:
     if continueTraning:
         print("Loading network")
-        with open("best_network", 'rb') as f:
+        with open("train_network", 'rb') as f:
             object = pickle.load(f)
             temp = {}
             if type(object) == type(temp):
                 network = object["network"]
                 trainingLoss = object["trainLoss"]
-                valLoss = ["valLoss"]
+                valLoss = object["valLoss"]
+                validationLoss = valLoss[len(valLoss)-1]
             else:
                 network = object
                 trainingLoss = []
                 valLoss = []
+                validationLoss = 9000
 except:
     continueTraning = False
     print("You don't have an existing network")
@@ -106,15 +148,18 @@ if continueTraning == False:
     valLoss = []
     print("Creates new network")
     network = createNetwork()
+    validationLoss = 9000
 optimizer = optim.Adam(network.parameters(), lr = learningRate)
 bestModel = copy.deepcopy(network)
 lossFunction = nn.CrossEntropyLoss()
-validationLoss = 9000
 
-
+# Used 
 totalElements = epochs*val1.__len__()+epochs*train.__len__()
 elementsDone = 0
 starT = datetime.now()
+
+with open("networks/results", "a+") as f:
+    f.write("# New training started at " + str(starT) + "\n\n")
 
 print("Training started:",starT,"\n")
 for epoch in range(epochs):
@@ -161,9 +206,21 @@ for epoch in range(epochs):
             end='                         Done: {:2.3%} Time left: {} '.format(elementsDone/totalElements,tLeft)
         )
     
-    #Calculate the newValidationloss
+    # Calculate the newValidationloss
     newValidationloss = totalValLoss/i
     valLoss.append(newValidationloss)
+
+    # Saves the current object
+    info = "Date trained: {}, epochs trained: {}, batch size: ".format(datetime.now(),len(trainingLoss),batchSize)
+    saveObject = {
+            "network": network,
+            "valLoss": valLoss,
+            "trainLoss": trainingLoss,
+            "info": info
+        }
+    with open("train_network", 'wb') as f:
+        pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
+
 
     if newValidationloss < validationLoss:
         validationLoss = newValidationloss
@@ -181,45 +238,44 @@ for epoch in range(epochs):
         with open("best_network", 'wb') as f:
             pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
 
+    if len(valLoss) % 10 == 0:
+        info = "Date trained: {}, epochs trained: {}, batch size: ".format(datetime.now(),len(trainingLoss),batchSize)
+        trainSave = "train" + str(epoch)
+        valSave = "val" + str(epoch)
+        saveObject = {
+            "network": network,
+            "valLoss": valLoss,
+            "trainLoss": trainingLoss,
+            "info": info
+        }
+        with open("networks/"+trainSave, 'wb') as f:
+            pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
+        saveObject = {
+            "network": bestModel,
+            "valLoss": valLoss,
+            "trainLoss": trainingLoss,
+            "info": info
+        }
+        with open("networks/"+valSave, 'wb') as f:
+            pickle.dump(saveObject, f, protocol=pickle.HIGHEST_PROTOCOL)
+        result = testData()
+        result = "## " + valSave + "\n" + result + "\n"
+
+        with open("networks/results.md", "a+") as f:
+            f.write(result)
+        #print(1/0)
+        break
+        
+
     #writer.add_scalar('MINST/validationloss', newValidationloss/i, epoch)
 
-# Run on test data
-corr = 0
-guesses = 0
-correctSick = 0
-incorrectSick = 0
-correctNormal = 0
-incorrectNormal = 0
-noImages = val2.__len__()
-starT = datetime.now()
 
-for index, (image, label,_) in enumerate(testLoader):
-    
-    guess = torch.argmax(bestModel(image), dim=-1)
-    result = (guess == label).sum()
-    corr += result.item()
-    guesses +=image.size()[0]
-    nowT = datetime.now()
-    deltaT =  nowT - starT
-    tLeft = deltaT*(1/(guesses/noImages)-1)
 
-    if guess.item()==1:
-        if label.item() == 1:
-            correctSick+=1
-        else:
-            incorrectSick+=1
-    else:
-        if label.item() == 0:
-            correctNormal+=1
-        else: 
-            incorrectNormal+=1
-    print("\r", "Right guess: {:3.2%}".format(corr/guesses), "Tested pictures: {:3.2%}".format(guesses/noImages) ,
-        end="                 Time left: {} ".format(tLeft)
-    )
-correctness = corr/noImages
-print("\n","Result on test:{:2.3%}".format(correctness))
-print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
-print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)
-#writer.add_hparams({'lr': learning_rate, 'bsize': batch_size, 'run': 'MNIST Traingin'},
-#                    {'hparam/accuracy': correctness})
+testData()
 
+plt.plot(trainingLoss)
+plt.plot(valLoss)
+plt.ylabel('Loss')
+plt.xlabel("Epochs")
+plt.savefig("networks/lossLastTraining"".pdf",format="pdf")
+plt.show()

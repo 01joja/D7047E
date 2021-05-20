@@ -73,6 +73,7 @@ for index, (image, label,_) in enumerate(test_loader):
         end="                 Time left: {} ".format(tLeft)
     )
 correctness = corr/noImages
+
 print("\n","Result on test:{:2.3%}".format(correctness))
 print("Guessed correct sick:", correctSick, "Guessed incorrect sick:", incorrectSick)
 print("Guessed correct normal:", correctNormal, "Guessed incorrect normal:", incorrectNormal)
