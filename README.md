@@ -18,4 +18,7 @@ Follow these steps and it should work:
 6. Run train.py
 7. Run checkCorrectness.py
 
-Do not change anything in train.py or you might get a bad result.
+## Our Network
+
+Press the [Link](https://drive.google.com/file/d/12TmMhDVxPW5T29x5HZTLFL8NbG2xxj3E/view?usp=sharing) to download
+
