@@ -2,19 +2,19 @@
 
 ## 1.1 Task 1
 
-### 1.1.1 Question
+### 1.1.1 Question 1
 
 For 5 time steps
 
-$$
+```math
 (20 \cdot 128 + 128 \cdot 10 )\cdot 5 + 128 \cdot 4 = 19712.
-$$
+```
 
 For 10 time steps
 
-$$
+```math
 (20 \cdot 128 + 128 \cdot 10 )\cdot 10 + 128 \cdot 9 = 39552.
-$$
+```
 
 ### 1.1.2  Question 2
 
