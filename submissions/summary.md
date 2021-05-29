@@ -88,6 +88,9 @@ Kernel PCA (Kernel principal component analysis):
 Isomap:
 - 
 
+Linear embedding:
+- 
+
 PCA:
 - Read more
 
@@ -135,7 +138,10 @@ RNN (Recurrent neural network) are used for variable length sequences of input. 
 
 LSTM (long short-term memory) is a way to solve (or at least lessen) the problem with the vanishing or exploding gradient. LSTM consist of a cell state that can be tapped into, changed or forgotten over time. 
 Architecture LSTM:
-- Dose the forget gate only use 1 or 0?
+- First a forget gate (Cell_t = Cell_t-1*sigmoid(Weight_f[h_t-1,x_t]+b_f)). 
+- Then a update gate (Cell_t = Cell_t (sigmoid(Weight_i*[h_t-1,x_t]) + bias_i) * tanh(Wight_c * [h_t-1,x_t] + bias_c)).
+- Then the output (h_t =than(Cell_t)*sigmoid(Weight_o[h_t-1,x_t]+bias_o))
+- Are LSTM_t-1 fully connected to the LSTM_t? Also the cell states? How dose that work?
 
 Different RNNs:
 - one to one
@@ -148,6 +154,10 @@ Use cases:
 - Books.
 - Movies.
 - Any data that has a "bigger picture".
+
+Attention:
+- A small network between the encoder and the decoder? [link](https://medium.com/swlh/a-simple-overview-of-rnn-lstm-and-attention-mechanism-9e844763d07b)
+- 
 
 
 ## NLP (Natural Language Processing)
