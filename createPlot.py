@@ -12,14 +12,14 @@ import pickle
 
 valLoss = []
 trainLoss = []
-with open("networks/epochs_10", 'rb') as f:
+with open("best_network", 'rb') as f:
     network = pickle.load(f)
-    valLoss = network["valLoss"][1:]
+    valLoss = network["valLoss"]
     trainLoss = network["trainLoss"]
 
 
-plt.plot(trainLoss)
-plt.plot(valLoss)
+plt.plot(trainLoss,label="hej")
+plt.plot(valLoss,label="2")
 plt.ylabel('Loss')
 plt.xlabel("Epochs")
 plt.savefig("networks/loss" + ".pdf",format="pdf")

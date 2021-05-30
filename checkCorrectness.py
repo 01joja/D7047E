@@ -14,7 +14,7 @@ import os
 from datetime import datetime, timedelta
 
 batch_size = 1
-epochs = 10
+epochs = 100
 learning_rate = 0.001
 
 preprocess = False
@@ -30,7 +30,7 @@ Dataset =loadDataset.PneumoniaDataSet(val2Path, transform = transform, preproces
 test_loader = DataLoader(Dataset, batch_size= batch_size, shuffle=True)
 
 # Change what network you want to check here.
-with open("networks/epochs_80", 'rb') as f:
+with open("networks/train10", 'rb') as f:
     object = pickle.load(f)
     temp = {}
     if type(object) == type(temp):

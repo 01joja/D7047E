@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import moveDataset
 
 batchSize = 200
-epochs = 60
+epochs = 100
 learningRate = 0.001
 
 
@@ -53,7 +53,7 @@ def testData():
             end="                 Time left: {} ".format(tLeft)
         )
     correctness = corr/noImages
-    output="\n"+"Result on test: {:2.3%}".format(correctness)+"\nGuessed correct sick:"+ str(correctSick)+ " Guessed incorrect sick:"+ str(incorrectSick) + "\nGuessed correct normal:" + str(correctNormal) + " Guessed incorrect normal:" + str(incorrectNormal) + "\nNormal correctness: {:2.3%} Sick correctness: {:2.3%} ".format(correctNormal/(correctNormal+incorrectSick), correctSick/(correctSick+incorrectNormal))
+    output="\n"+"Result on Val2: {:2.3%}".format(correctness)+"\nGuessed correct sick:"+ str(correctSick)+ " Guessed incorrect sick:"+ str(incorrectSick) + "\nGuessed correct normal:" + str(correctNormal) + " Guessed incorrect normal:" + str(incorrectNormal) + "\nNormal correctness: {:2.3%} Sick correctness: {:2.3%} ".format(correctNormal/(correctNormal+incorrectSick), correctSick/(correctSick+incorrectNormal))
     print(output)
     return output
 
@@ -158,7 +158,12 @@ totalElements = epochs*val1.__len__()+epochs*train.__len__()
 elementsDone = 0
 starT = datetime.now()
 
-with open("networks/results", "a+") as f:
+try:
+    os.mkdir("networks")
+except:
+    print("folder networks already exists")
+
+with open("networks/results.md", "a+") as f:
     f.write("# New training started at " + str(starT) + "\n\n")
 
 print("Training started:",starT,"\n")
@@ -240,8 +245,8 @@ for epoch in range(epochs):
 
     if len(valLoss) % 10 == 0:
         info = "Date trained: {}, epochs trained: {}, batch size: ".format(datetime.now(),len(trainingLoss),batchSize)
-        trainSave = "train" + str(epoch)
-        valSave = "val" + str(epoch)
+        trainSave = "train" + str(len(valLoss))
+        valSave = "val" + str(len(valLoss))
         saveObject = {
             "network": network,
             "valLoss": valLoss,
@@ -264,7 +269,6 @@ for epoch in range(epochs):
         with open("networks/results.md", "a+") as f:
             f.write(result)
         #print(1/0)
-        break
         
 
     #writer.add_scalar('MINST/validationloss', newValidationloss/i, epoch)
