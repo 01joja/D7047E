@@ -4,3 +4,6 @@ modded_dataset/
 best_network
 cifar-10-batches-py/
 __pycache__/
+train_network
+networks/
+runs/
